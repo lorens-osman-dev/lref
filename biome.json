@@ -1,0 +1,18 @@
+{
+  "formatter": {
+    "lineWidth": 110,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "useAwait": "error",
+        "noExplicitAny": "warn"
+      },
+      "complexity": {
+        "noForEach": "off"
+      }
+    }
+  }
+}
