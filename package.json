@@ -1,0 +1,40 @@
+{
+  "name": "lref",
+  "version": "1.0.0",
+  "description": "A better ref",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "jest"
+  },
+  "keywords": [
+    "vue",
+    "composition-api",
+    "reactive",
+    "reference",
+    "ref",
+    "lorens",
+    "osman",
+    "lref",
+    "better",
+    "ref"
+  ],
+  "author": "Lorens Osman",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.2",
+    "typescript": "^5.5.3",
+    "vue": "^3.4.31"
+  }
+}
