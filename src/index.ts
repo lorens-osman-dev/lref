@@ -1,6 +1,6 @@
 import { computed, ref, type ComputedRef, type Ref, isRef, type UnwrapRef } from "vue";
 import deepClone from "./deepClone";
-import { useRefHistory } from "@vueuse/core";
+import { useRefHistory, type UseRefHistoryRecord } from "@vueuse/core";
 
 export class Refer<T> {
   ref: Ref<T>;
@@ -36,7 +36,14 @@ export class Refer<T> {
   }
 }
 
-type lrefKeys = "Ref" | "Computed" | "LastValueBeforeLastReset" | "Reset" | "UnConnected" | "Initial";
+type lrefKeys =
+  | "Ref"
+  | "Computed"
+  | "LastValueBeforeLastReset"
+  | "Reset"
+  | "UnConnected"
+  | "Initial"
+  | "History";
 
 type lrefObject<Name extends string, T> = {
   [K in `${Lowercase<Name>}${lrefKeys}`]: K extends `${string}Initial`
@@ -51,9 +58,16 @@ type lrefObject<Name extends string, T> = {
             ? Ref<UnwrapRef<T>>
             : K extends `${string}Ref`
               ? Ref<T>
-              : never;
+              : K extends `${string}History`
+                ? HistoryFace<T>
+                : never;
 };
 
+interface HistoryFace<T> {
+  data: Ref<UseRefHistoryRecord<T>[]>;
+  undo: () => void;
+  redo: () => void;
+}
 export function lref<Name extends string, T>(
   nameParameter: Name,
   parameter: T | Ref<T>,
@@ -61,8 +75,14 @@ export function lref<Name extends string, T>(
   const vars = new Refer(parameter);
   const name = nameParameter.toLowerCase();
   const { history, undo, redo } = useRefHistory(vars.ref);
+  const historyObj = {
+    data: history,
+    undo,
+    redo,
+  };
   return {
     [`${name}Ref`]: vars.ref,
+    [`${name}History`]: historyObj,
     [`${name}Initial`]: () => vars.initial(),
     [`${name}Computed`]: vars.computed,
     [`${name}LastValueBeforeLastReset`]: () => vars.lastValueBeforeLastReset(),
