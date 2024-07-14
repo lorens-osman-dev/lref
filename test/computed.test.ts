@@ -1,106 +1,71 @@
-import { lref, Refer } from "../src/index";
-
-import { describe, it, expect } from "vitest";
+import { lref } from "../src/index";
+import { describe, it, expect, vi } from "vitest";
 import { ref } from "vue";
 
-describe("Refer class", () => {
-  it("computed property reflects changes to ref", () => {
-    const obj = ref({ name: "lorens", age: 32 });
-    const gg = new Refer(obj);
-    expect(gg.computed.value).toEqual({ name: "lorens", age: 32 });
-
-    // Test reactivity
-    gg.ref.value.name = "John";
-    expect(gg.computed.value).toEqual({ name: "John", age: 32 });
-
-    gg.ref.value = { name: "Alice", age: 25 };
-    expect(gg.computed.value).toEqual({ name: "Alice", age: 25 });
-  });
-});
-
-/*
 describe("lref computed property", () => {
-  test("computed property reflects changes to ref", () => {
-    const obj = ref({ name: "lorens", age: 32 });
-    const gg = new Refer(obj);
-    expect(gg.computed.value).toEqual({ name: "lorens", age: 32 });
+  it("computed property is readonly", () => {
+    const { testComputed } = lref("test", 42);
 
-    // Add more assertions to test reactivity
-    gg.ref.value.name = "John";
-    expect(gg.computed.value).toEqual({ name: "John", age: 32 });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    gg.ref.value = { name: "Alice", age: 25 };
-    expect(gg.computed.value).toEqual({ name: "Alice", age: 25 });
-    // testRef.value.count = 10;
-    // console.log("*******************");
-    // console.log(testComputed.value);
-    // expect(testComputed.value).toEqual({ count: 10 });
+    // Attempt to assign a value to the readonly computed property
+    // @ts-ignore - Typescript will catch this error, but we want to test runtime behavior
+    testComputed.value = 100;
 
-    // testRef.value = { count: 20 };
-    // expect(testComputed.value).toEqual({ count: 20 });
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
-  test("computed property is readonly", () => {
-  	const { testComputed } = lref("test", 42);
+  it("computed property for complex objects", () => {
+    const { testRef, testComputed } = lref("test", {
+      user: { name: "Alice", age: 30 },
+      scores: [85, 90, 95],
+    });
 
-  	expect(() => {
-  		// @ts-ignore - Typescript will catch this error, but we want to test runtime behavior
-  		testComputed.value = 100;
-  	}).toThrow();
+    expect(testComputed.value).toEqual({
+      user: { name: "Alice", age: 30 },
+      scores: [85, 90, 95],
+    });
+
+    testRef.value.user.name = "Bob";
+    testRef.value.scores.push(100);
+
+    expect(testComputed.value).toEqual({
+      user: { name: "Bob", age: 30 },
+      scores: [85, 90, 95, 100],
+    });
   });
 
-  test("computed property for complex objects", () => {
-  	const { testRef, testComputed } = lref("test", {
-  		user: { name: "Alice", age: 30 },
-  		scores: [85, 90, 95],
-  	});
+  it("computed property with primitive values", () => {
+    const { testRef, testComputed } = lref("test", "hello");
 
-  	expect(testComputed.value).toEqual({
-  		user: { name: "Alice", age: 30 },
-  		scores: [85, 90, 95],
-  	});
+    expect(testComputed.value).toBe("hello");
 
-  	testRef.value.user.name = "Bob";
-  	testRef.value.scores.push(100);
-
-  	expect(testComputed.value).toEqual({
-  		user: { name: "Bob", age: 30 },
-  		scores: [85, 90, 95, 100],
-  	});
+    testRef.value = "world";
+    expect(testComputed.value).toBe("world");
   });
 
-  test("computed property with primitive values", () => {
-  	const { testRef, testComputed } = lref("test", "hello");
+  it("computed property after reset", () => {
+    const { testRef, testComputed, testReset } = lref("test", { count: 0 });
 
-  	expect(testComputed.value).toBe("hello");
+    testRef.value.count = 10;
+    expect(testComputed.value).toEqual({ count: 10 });
 
-  	testRef.value = "world";
-  	expect(testComputed.value).toBe("world");
+    testReset();
+    expect(testComputed.value).toEqual({ count: 0 });
   });
 
-  test("computed property after reset", () => {
-  	const { testRef, testComputed, testReset } = lref("test", { count: 0 });
+  it("computed property with Vue ref as input", () => {
+    const vueRef = ref({ count: 0 });
+    const { testRef, testComputed } = lref("test", vueRef);
 
-  	testRef.value.count = 10;
-  	expect(testComputed.value).toEqual({ count: 10 });
+    expect(testComputed.value).toEqual({ count: 0 });
 
-  	testReset();
-  	expect(testComputed.value).toEqual({ count: 0 });
-  });
+    vueRef.value.count = 10;
+    expect(testComputed.value).toEqual({ count: 10 });
 
-  test("computed property with Vue ref as input", () => {
-  	const vueRef = ref({ count: 0 });
-  	const { testRef, testComputed } = lref("test", vueRef);
-
-  	expect(testComputed.value).toEqual({ count: 0 });
-
-  	vueRef.value.count = 10;
-  	expect(testComputed.value).toEqual({ count: 10 });
-
-  	testRef.value = { count: 20 };
-  	expect(testComputed.value).toEqual({ count: 20 });
-  	expect(vueRef.value).toEqual({ count: 20 });
+    testRef.value = { count: 20 };
+    expect(testComputed.value).toEqual({ count: 20 });
+    expect(vueRef.value).toEqual({ count: 20 });
   });
 });
-
-*/
