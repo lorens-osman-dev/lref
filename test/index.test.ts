@@ -1,15 +1,15 @@
 import { lref, Refer } from "../src/index";
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 
 // Mock Vue's ref and computed functions
-jest.mock('vue', () => ({
-  ref: jest.fn((val) => ({ value: val })),
-  computed: jest.fn((getter) => ({ value: getter() })),
+jest.mock("vue", () => ({
+	ref: jest.fn((val) => ({ value: val })),
+	computed: jest.fn((getter) => ({ value: getter() })),
 }));
 
 //: tests
 describe("lref ", () => {
-	test("lref creates an object with correct properties", () => {
+	test("lref creates  an object with correct properties", () => {
 		const result = lref("test", 42);
 
 		expect(result.testRef).toBeDefined();
