@@ -1,12 +1,12 @@
 import { computed, ref, type ComputedRef, type Ref, isRef, type UnwrapRef } from "vue";
 import deepClone from "./deepClone";
+import { useRefHistory } from "@vueuse/core";
 
 export class Refer<T> {
   ref: Ref<T>;
   unConnected: Ref<UnwrapRef<T>>;
   private refDeepClone: T;
   private lastValue: T | null = null;
-  // computed: ComputedRef<T>;
 
   constructor(parameter: T | Ref<T>) {
     if (isRef(parameter)) {
@@ -17,7 +17,6 @@ export class Refer<T> {
 
     this.refDeepClone = deepClone(this.ref.value);
     this.unConnected = ref<T>(deepClone(this.ref.value));
-    // this.computed = computed(() => this.ref.value);
   }
 
   reset(): void {
@@ -61,11 +60,11 @@ export function lref<Name extends string, T>(
 ): lrefObject<Name, T> {
   const vars = new Refer(parameter);
   const name = nameParameter.toLowerCase();
-  const ff = computed(() => vars.ref.value);
+  const { history, undo, redo } = useRefHistory(vars.ref);
   return {
     [`${name}Ref`]: vars.ref,
     [`${name}Initial`]: () => vars.initial(),
-    [`${name}Computed`]: ff,
+    [`${name}Computed`]: vars.computed,
     [`${name}LastValueBeforeLastReset`]: () => vars.lastValueBeforeLastReset(),
     [`${name}Reset`]: () => vars.reset(),
     [`${name}UnConnected`]: vars.unConnected,
