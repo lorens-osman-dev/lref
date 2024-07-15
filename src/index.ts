@@ -25,6 +25,8 @@ export class Refer<T> {
   unConnected: Ref<UnwrapRef<T>>;
   private refDeepClone: T;
   private lastValue: T | null = null;
+  private _computed: ComputedRef<T>;
+  private _computeFn: ((value: T) => T) | null = null;
 
   constructor(parameter: T | Ref<T>) {
     if (isRef(parameter)) {
@@ -35,6 +37,12 @@ export class Refer<T> {
 
     this.refDeepClone = deepClone(this.ref.value);
     this.unConnected = ref<T>(deepClone(this.ref.value));
+    this._computed = computed(() => {
+      if (this._computeFn) {
+        return this._computeFn(this.ref.value);
+      }
+      return this.ref.value;
+    });
   }
 
   reset(): void {
@@ -49,8 +57,13 @@ export class Refer<T> {
   initial(): T {
     return deepClone(this.refDeepClone);
   }
+
+  setComputed(computeFn: (value: T) => T): void {
+    this._computeFn = computeFn;
+  }
+
   get computed(): ComputedRef<T> {
-    return computed(() => this.ref.value);
+    return this._computed;
   }
 }
 
@@ -114,7 +127,9 @@ interface HistoryFace<T> {
 export function lref<Name extends string, T>(
   nameParameter: Name,
   parameter: T | Ref<T>,
-): lrefObject<Name, T> {
+): lrefObject<Name, T> & {
+  [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => Partial<T>) => void;
+} {
   const vars = new Refer(parameter);
   const name = nameParameter.toLowerCase();
   const { history, undo, redo } = useRefHistory(vars.ref);
@@ -131,5 +146,8 @@ export function lref<Name extends string, T>(
     [`${name}LastValueBeforeLastReset`]: () => vars.lastValueBeforeLastReset(),
     [`${name}Reset`]: () => vars.reset(),
     [`${name}UnConnected`]: vars.unConnected,
-  } as lrefObject<Name, T>;
+    [`${name}SetComputed`]: (computeFn: (value: T) => T) => vars.setComputed(computeFn),
+  } as lrefObject<Name, T> & {
+    [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => Partial<T>) => void;
+  };
 }

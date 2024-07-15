@@ -1,27 +1,19 @@
 import { lref } from "../src/index";
-import { computed, ref, type ComputedRef, type Ref, isRef, type UnwrapRef } from "vue";
+// const { testRef, testComputed, testSetComputed } = lref("test", obj);
+// const obj = { name: "lorens", age: 32 };
+
+// console.log(testRef.value);
+// testRef.value.age = 10;
+// testSetComputed((value) => ({ name: value.name, age: value.age * 20 }));
+// testRef.value.age = 30;
+
+// console.log("testComputed :", testComputed.value);
 const obj = { name: "lorens", age: 32 };
-const jj = lref("test", obj);
+const { testRef, testComputed, testSetComputed } = lref("test", obj);
 
-// jj.testRef.value.age = 40;
+testSetComputed((value) => ({ ...value, age: value.age * 2 }));
+console.log(testComputed.value);
 
-// console.log(jj.testRef.value);
+testSetComputed((value) => ({ ...value, age: value.age + 10 }));
 
-// setTimeout(() => {
-//   jj.testRef.value.age = 45;
-//   console.log(jj.testHistory.data.value);
-// }, 1000);
-// setTimeout(() => {
-//   jj.testRef.value.age = 49;
-//   console.log(jj.testHistory.data.value);
-// }, 2000);
-// setTimeout(() => {
-//   jj.testRef.value.age = 45;
-//   console.log(jj.testHistory.data.value);
-// }, 3000);
-// setTimeout(() => {
-//   jj.testRef.value.age = 50;
-//   console.log(jj.testRef.value);
-//   jj.testHistory.undo();
-//   console.log(jj.testRef.value);
-// }, 4000);
+console.log(testComputed.value);
