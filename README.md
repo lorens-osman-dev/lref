@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/lref.svg" alt="lref function"/>
+  <img src="https://github.com/lorens-osman-dev/lref/blob/main/assets/lref.svg" alt="lref function"/>
 </p>
 
 ## Lref() Vue3 ref() on steroids
