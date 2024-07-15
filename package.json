@@ -1,6 +1,7 @@
 {
   "name": "lref",
   "version": "1.0.0",
+  "type": "module",
   "description": "A better ref",
   "main": "dist/index.js",
   "module": "dist/index.js",
