@@ -4,6 +4,24 @@ import { useRefHistory, type UseRefHistoryRecord } from "@vueuse/core";
 
 export class Refer<T> {
   ref: Ref<T>;
+  /**
+   * A disconnected reactive copy of the reference value.
+   * This is a separate Ref that holds a deep clone of the original value.
+   * It allows for isolated modifications without affecting the original reference.
+   *
+   * Use cases:
+   * - Creating a draft or temporary state
+   * - Comparing current state with a modifiable initial state
+   * - Implementing undo/redo functionality
+   *
+   * @type {Ref<UnwrapRef<T>>}
+   * @example
+   * const myRefer = new Refer(ref({ name: "Lorens" }));
+   * myRefer.disconnected.value.name = "Ahmed";
+   * console.log(myRefer.value.name); // Still "Lorens"
+   * console.log(myRefer.disconnected.value.name); // "Ahmed"
+   *
+   */
   unConnected: Ref<UnwrapRef<T>>;
   private refDeepClone: T;
   private lastValue: T | null = null;
@@ -68,6 +86,31 @@ interface HistoryFace<T> {
   undo: () => void;
   redo: () => void;
 }
+
+/**
+ * Creates a reactive reference object with extended functionality.
+ *
+ * @template Name - A string type for the name parameter.
+ * @template T - The type of the value being wrapped.
+ *
+ * @param {Name} nameParameter - A string used to prefix the returned properties.
+ * @param {T | Ref<T>} parameter - The initial value or a Ref to wrap.
+ *
+ * @returns {lrefObject<Name, T>} An object containing various reactive properties and methods:
+ *   - `${name}Ref`: The reactive reference.
+ *   - `${name}Initial`: A function that returns the initial value.
+ *   - `${name}Computed`: A computed property based on the reference.
+ *   - `${name}Reset`: A function to reset the value to its initial state.
+ *   - `${name}LastValueBeforeLastReset`: A function that returns the last value before reset.
+ *   - `${name}UnConnected`: An unconnected copy of the reference.
+ *   - `${name}History`: An object with undo/redo functionality and history data.
+ *
+ * @example
+ * const { countRef, countReset, countHistory } = lref('count', 0);
+ * countRef.value++; // Increments the count
+ * countReset(); // Resets count to 0
+ * countHistory.undo(); // Undoes the last change
+ */
 export function lref<Name extends string, T>(
   nameParameter: Name,
   parameter: T | Ref<T>,

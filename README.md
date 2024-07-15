@@ -2,32 +2,77 @@
   <img src="./assets/lref.svg" alt="lref function"/>
 </p>
 
-## Lref()
+## Lref() Vue3 ref() on steroids
 
-Lomotion is Gnome extension lets you switch and manage Gnome's workspaces seamlessly.
+`lref()` is a utility function for Vue 3 that extends the functionality of Vue's reactive reference `ref()`. It provides a set of convenient methods and properties for managing state, tracking history, and handling resets.
 
-### How ?
+## Installation
 
-- Switch to the previous workspace with[CapsLock + A] and the next with [CapsLock + S]
-- Move the current window to the previous workspace with [CapsLock + D] or the next with [CapsLock + F]
-- Switch between windows in the current workspace [CapsLock + E]
-- Show workspaces overview hit [CapsLock] once
-- Show applications hit [CapsLock] twice
+```bash
+npm install lref
+```
 
-### Why ?!
+## Usage
 
-- One-handed control, manage your workspaces with just one hand, boosting your efficiency and focus.
-- Enjoy immersive fullscreen applications without worrying about switching workspaces.
-- intutive, simple and fast.
+```ts
+import { lref } from "lref";
 
-### Tip
+const { countRef, countComputed, countReset, countInitial } = lref("count", 0);
 
-- For applications with tabs like Visual Studio Code, web browsers, and many others, you can use keyboard shortcuts to switch between tabs, you can set switch to previous tab [CapsLock + Q] and the next with [CapsLock + W]
+// Access the reactive reference
+console.log(countRef.value); // 0
 
-### Installation
+// Use the computed property
+console.log(countComputed.value); // 0
 
-- From : [extensions.gnome.org](https://extensions.gnome.org/extension/6768/lomotion/)
-- Or open **Extension Manager** > Browse > type **lomotion** > install
+// Reset to initial value
+countReset();
+
+// Get the initial value
+console.log(countInitial()); // 0
+```
+
+```ts
+const { userRef, userUnConnected, userLastValueBeforeLastReset, userHistory } = lref("user", { name: "Lorens", age: 30 });
+
+// Modify the reactive reference
+userRef.value.name = "Ahmed";
+
+// Access the unconnected copy
+console.log(userUnConnected.value); // { name: 'Lorens', age: 30 }
+
+// Get the last value before reset
+console.log(userLastValueBeforeLastReset()); // null (or previous value if reset was called)
+
+// Use history features
+userHistory.undo();
+userHistory.redo();
+console.log(userHistory.data.value); // Array of historical states
+```
+
+## API
+
+The lref function returns an object with the following properties and methods:
+
+- ${name}Ref: The reactive reference (Ref<T>)
+- ${name}Computed: A computed property based on the reference (ComputedRef<T>)
+- ${name}Initial: Function that returns the initial value (() => T)
+- ${name}Reset: Function to reset the value to its initial state (() => void)
+- ${name}UnConnected: An unconnected copy of the reference (Ref<UnwrapRef<T>>)
+- ${name}LastValueBeforeLastReset: Function that returns the last value before reset (() => T | null)
+- ${name}History: Object containing history-related methods and data
+
+  - data: Ref to an array of historical states
+  - undo: Function to undo the last change
+  - redo: Function to redo the last undone change
+
+## Use Cases
+
+- Form Handling: Manage form state with easy reset capability.
+- Undo/Redo Functionality: Implement undo/redo in applications like text editors or drawing tools.
+- State Management: Keep track of state changes and provide rollback options.
+- Data Comparison: Compare current state with initial or previous states.
+- Debugging: Track the history of state changes for debugging purposes.
 
 ---
 

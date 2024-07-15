@@ -1,7 +1,6 @@
-import { lref, Refer } from "../src/index";
+import { lref } from "../src/index";
 import { computed, ref, type ComputedRef, type Ref, isRef, type UnwrapRef } from "vue";
 const obj = { name: "lorens", age: 32 };
-
 const jj = lref("test", obj);
 
 // jj.testRef.value.age = 40;
