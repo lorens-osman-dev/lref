@@ -498,8 +498,29 @@ describe("lref with various data types", () => {
     const obj: any = { a: 1 };
     obj.self = obj;
 
-    // Circular references can't be deep cloned, so this should throw an error
-    expect(() => lref("test", obj)).toThrow();
+    const result = lref("test", obj);
+
+    // Check that result is a ref
+    expect(isRef(result.testRef)).toBe(true);
+
+    // Check the structure of result.testRef.value
+    expect(result.testRef.value).toEqual({
+      a: 1,
+      self: expect.any(Object),
+    });
+
+    // Check that the circular reference is maintained
+    expect(result.testRef.value.self).toBe(result.testRef.value);
+
+    // Check that the non-circular property is correct
+    expect(result.testRef.value.a).toBe(1);
+
+    // Check that the original object is not the same as the result
+    expect(result.testRef.value).not.toBe(obj);
+
+    // Optional: Check that the original object is unchanged
+    expect(obj.self).toBe(obj);
+    expect(obj.a).toBe(1);
   });
 
   test("lref with NaN value", () => {

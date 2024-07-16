@@ -45,6 +45,8 @@
     "vue": "^3.4.31"
   },
   "dependencies": {
-    "@vueuse/core": "^10.11.0"
+    "@types/lodash.clonedeep": "^4.5.9",
+    "@vueuse/core": "^10.11.0",
+    "lodash.clonedeep": "^4.5.0"
   }
 }

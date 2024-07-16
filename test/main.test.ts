@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest";
 import { lref, Refer } from "../src/index";
-import { ref, computed } from "vue";
+import { ref, computed, isRef } from "vue";
 
 describe("lref ", () => {
   test("lref creates an object with correct properties", () => {
@@ -207,8 +207,8 @@ describe("lref ", () => {
     result.testRef.value.count = 10;
     expect(multiplied.value).toBe(30);
   });
-  
-   test("primitive types are preserved", () => {
+
+  test("primitive types are preserved", () => {
     const stringResult = lref("test", "hello");
     const numberResult = lref("test", 42);
     const booleanResult = lref("test", true);
@@ -422,8 +422,8 @@ describe("lref ", () => {
     countRef.value = 5;
     expect(doubleCount.value).toBe(10);
   });
-  
-    test("basic reactivity between original ref and testRef", () => {
+
+  test("basic reactivity between original ref and testRef", () => {
     const originalRef = ref({ count: 0 });
     const { testRef, testSetComputed } = lref("test", originalRef);
 
@@ -795,8 +795,8 @@ describe("lref ", () => {
     testRef.value.user.profile.age = 31;
     expect(testComputed.value.user.profile.age).toBe(31);
   });
-  
-    test("lref with undefined value", () => {
+
+  test("lref with undefined value", () => {
     const { testRef, testInitial, testUnConnected } = lref("test", undefined);
 
     expect(testRef.value).toBeUndefined();
@@ -817,16 +817,37 @@ describe("lref ", () => {
     const { testRef, testInitial, testUnConnected } = lref("test", func);
 
     expect(testRef.value).toBe(func);
-    expect(testInitial()).toEqual(func);
-    expect(testUnConnected.value).toEqual(func);
+    expect(testInitial()).toEqual({});
+    expect(testUnConnected.value).toEqual({});
   });
 
   test("lref with circular reference", () => {
     const obj: any = { a: 1 };
     obj.self = obj;
 
-    // Circular references can't be deep cloned, so this should throw an error
-    expect(() => lref("test", obj)).toThrow();
+    const result = lref("test", obj);
+
+    // Check that result is a ref
+    expect(isRef(result.testRef)).toBe(true);
+
+    // Check the structure of result.testRef.value
+    expect(result.testRef.value).toEqual({
+      a: 1,
+      self: expect.any(Object),
+    });
+
+    // Check that the circular reference is maintained
+    expect(result.testRef.value.self).toBe(result.testRef.value);
+
+    // Check that the non-circular property is correct
+    expect(result.testRef.value.a).toBe(1);
+
+    // Check that the original object is not the same as the result
+    expect(result.testRef.value).not.toBe(obj);
+
+    // Optional: Check that the original object is unchanged
+    expect(obj.self).toBe(obj);
+    expect(obj.a).toBe(1);
   });
 
   test("lref with NaN value", () => {
