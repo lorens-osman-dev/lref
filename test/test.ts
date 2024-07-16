@@ -1,19 +1,12 @@
 import { lref } from "../src/index";
-// const { testRef, testComputed, testSetComputed } = lref("test", obj);
-// const obj = { name: "lorens", age: 32 };
+const date = new Date("2023-01-01");
+const { testRef, testInitial, testUnConnected } = lref("test", date);
 
-// console.log(testRef.value);
-// testRef.value.age = 10;
-// testSetComputed((value) => ({ name: value.name, age: value.age * 20 }));
-// testRef.value.age = 30;
+// expect(testRef.value).toEqual(date);
 
-// console.log("testComputed :", testComputed.value);
-const obj = { name: "lorens", age: 32 };
-const { testRef, testComputed, testSetComputed } = lref("test", obj);
-
-testSetComputed((value) => ({ ...value, age: value.age * 2 }));
-console.log(testComputed.value);
-
-testSetComputed((value) => ({ ...value, age: value.age + 10 }));
-
-console.log(testComputed.value);
+console.log(testRef.value);
+const c = testInitial();
+console.log("c:", c);
+console.log(testUnConnected.value);
+// expect(testInitial()).toEqual(date);
+// expect(testUnConnected.value).toEqual(date);

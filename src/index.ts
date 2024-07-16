@@ -25,7 +25,6 @@ export class Refer<T> {
   unConnected: Ref<UnwrapRef<T>>;
   private refDeepClone: T;
   private lastValue: T | null = null;
-  private _computed: ComputedRef<T>;
   private _computeFn: ((value: T) => T) | null = null;
 
   constructor(parameter: T | Ref<T>) {
@@ -37,12 +36,6 @@ export class Refer<T> {
 
     this.refDeepClone = deepClone(this.ref.value);
     this.unConnected = ref<T>(deepClone(this.ref.value));
-    this._computed = computed(() => {
-      if (this._computeFn) {
-        return this._computeFn(this.ref.value);
-      }
-      return this.ref.value;
-    });
   }
 
   reset(): void {
@@ -58,40 +51,33 @@ export class Refer<T> {
     return deepClone(this.refDeepClone);
   }
 
-  setComputed(computeFn: (value: T) => T): void {
+  setComputed(computeFn: (value: T) => T): ComputedRef<T> {
     this._computeFn = computeFn;
-  }
-
-  get computed(): ComputedRef<T> {
-    return this._computed;
+    return computed(() => {
+      if (this._computeFn) {
+        return this._computeFn(this.ref.value);
+      }
+      return this.ref.value;
+    });
   }
 }
 
-type lrefKeys =
-  | "Ref"
-  | "Computed"
-  | "LastValueBeforeLastReset"
-  | "Reset"
-  | "UnConnected"
-  | "Initial"
-  | "History";
+type lrefKeys = "Ref" | "LastValueBeforeLastReset" | "Reset" | "UnConnected" | "Initial" | "History";
 
 type lrefObject<Name extends string, T> = {
   [K in `${Lowercase<Name>}${lrefKeys}`]: K extends `${string}Initial`
     ? () => T
-    : K extends `${string}Computed`
-      ? ComputedRef<T>
-      : K extends `${string}LastValueBeforeLastReset`
-        ? () => T | null
-        : K extends `${string}Reset`
-          ? () => void
-          : K extends `${string}UnConnected`
-            ? Ref<UnwrapRef<T>>
-            : K extends `${string}Ref`
-              ? Ref<T>
-              : K extends `${string}History`
-                ? HistoryFace<T>
-                : never;
+    : K extends `${string}LastValueBeforeLastReset`
+      ? () => T | null
+      : K extends `${string}Reset`
+        ? () => void
+        : K extends `${string}UnConnected`
+          ? Ref<UnwrapRef<T>>
+          : K extends `${string}Ref`
+            ? Ref<T>
+            : K extends `${string}History`
+              ? HistoryFace<T>
+              : never;
 };
 
 interface HistoryFace<T> {
@@ -128,7 +114,7 @@ export function lref<Name extends string, T>(
   nameParameter: Name,
   parameter: T | Ref<T>,
 ): lrefObject<Name, T> & {
-  [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => Partial<T>) => void;
+  [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => T) => ComputedRef<T>;
 } {
   const vars = new Refer(parameter);
   const name = nameParameter.toLowerCase();
@@ -142,12 +128,11 @@ export function lref<Name extends string, T>(
     [`${name}Ref`]: vars.ref,
     [`${name}History`]: historyObj,
     [`${name}Initial`]: () => vars.initial(),
-    [`${name}Computed`]: vars.computed,
     [`${name}LastValueBeforeLastReset`]: () => vars.lastValueBeforeLastReset(),
     [`${name}Reset`]: () => vars.reset(),
     [`${name}UnConnected`]: vars.unConnected,
     [`${name}SetComputed`]: (computeFn: (value: T) => T) => vars.setComputed(computeFn),
   } as lrefObject<Name, T> & {
-    [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => Partial<T>) => void;
+    [K in `${Lowercase<Name>}SetComputed`]: (computeFn: (value: T) => T) => ComputedRef<T>;
   };
 }
