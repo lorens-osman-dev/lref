@@ -20,21 +20,21 @@ function deepClone<T>(value: T, seen = new WeakMap<object, any>()): T {
     return value.map((item) => deepClone(item, seen)) as unknown as T;
   }
 
-  // Handle plain objects
-  if (
-    value !== null &&
-    typeof value === "object" &&
-    !(value instanceof Date) &&
-    !(value instanceof Set) &&
-    !(value instanceof Map)
-  ) {
-    const cloned = {} as T;
-    seen.set(value as object, cloned);
-    for (const [k, v] of Object.entries(value)) {
-      (cloned as any)[k] = deepClone(v, seen);
-    }
-    return cloned;
-  }
+  // // Handle plain objects
+  // if (
+  //   value !== null &&
+  //   typeof value === "object" &&
+  //   !(value instanceof Date) &&
+  //   !(value instanceof Set) &&
+  //   !(value instanceof Map)
+  // ) {
+  //   const cloned = {} as T;
+  //   seen.set(value as object, cloned);
+  //   for (const [k, v] of Object.entries(value)) {
+  //     (cloned as any)[k] = deepClone(v, seen);
+  //   }
+  //   return cloned;
+  // }
 
   // Use lodash's cloneDeep for everything else
   return cloneDeep(value);

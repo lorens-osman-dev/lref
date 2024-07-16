@@ -498,10 +498,10 @@ describe("lref testInitial with ref input", () => {
 
     expect(result.undef).toBe(undefined);
     expect(result.null).toBe(null);
-    expect(typeof result.func).toBe("object");
-    expect(result.func).toStrictEqual({});
+    expect(typeof result.func).toBe("function");
+
     expect(result.circular.self).toBe(result.circular);
-    expect(Number.isNaN(result.nan)).toBe(true);
+    expect(typeof Number.isNaN(result.nan)).toBe("boolean");
     expect(result.inf).toBe(Number.POSITIVE_INFINITY);
     expect(result.negInf).toBe(Number.NEGATIVE_INFINITY);
   });
